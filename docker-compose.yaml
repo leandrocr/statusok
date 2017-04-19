@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  influxdb:
+    image: influxdb
+    volumes:
+      - /var/lib/influxdb
+    environment:
+      - INFLUXDB_GRAPHITE_ENABLED=true
+    ports:
+      - 8086:8086
+      - 8083:8083
+    restart: always
+  statusok:
+    build:
+      context: .
+    image: sanathp/statusok
+    volumes:
+      - ./config.json:/opt/statusok_linux/config.json
+    links:
+      - influxdb
+    depends_on:
+      - influxdb
+    restart: always
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - /var/lib/grafana
+    links:
+      - influxdb
+    restart: always
